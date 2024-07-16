@@ -5,6 +5,7 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
 import VisibilityIcon from "../assets/svg/visibilityIcon.svg";
+import OAuth from "../components/OAuth";
 
 type FormDataProps = {
   email: string;
@@ -89,6 +90,8 @@ const SignIn = () => {
             </button>
           </div>
         </form>
+
+        <OAuth />
 
         <Link to="/sign-up" className="registerLink">
           Dont have an account? Sign Up
