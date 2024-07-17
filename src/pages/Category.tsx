@@ -20,7 +20,7 @@ interface Listings {
   data: DocumentData;
 }
 
-const Offers = () => {
+const Category = () => {
   const [listings, setListings] = useState<Listings[]>([]);
   const [loading, setLoading] = useState(true);
   const params = useParams();
@@ -34,7 +34,7 @@ const Offers = () => {
         // create query
         const q = query(
           listingRef,
-          where("offer", "==", true),
+          where("type", "==", params.categoryName),
           orderBy("timestamp", "desc"),
           limit(10)
         );
@@ -56,12 +56,16 @@ const Offers = () => {
       }
     };
     fetchListings();
-  }, []);
+  }, [params.categoryName]);
 
   return (
     <div className="category">
       <header>
-        <p className="pageHeader">Offers</p>
+        <p className="pageHeader">
+          {params.categoryName === "rent"
+            ? "Places for rent"
+            : "Places for sale"}
+        </p>
       </header>
       {loading ? (
         <Spinner />
@@ -80,10 +84,10 @@ const Offers = () => {
           </main>
         </>
       ) : (
-        <p>There are no current offers</p>
+        <p>No Listings for {params.categoryName}</p>
       )}
     </div>
   );
 };
 
-export default Offers;
+export default Category;

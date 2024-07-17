@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase.config";
 import { toast } from "react-toastify";
+import { ReactComponent as ArrowRight } from "../assets/svg/keyboardArrowRightIcon.svg";
+import { ReactComponent as HomeIcon } from "../assets/svg/homeIcon.svg";
 
 const Profile = () => {
   const auth = getAuth();
@@ -13,7 +15,6 @@ const Profile = () => {
     email: auth.currentUser?.email,
   });
   const { name, email } = formData;
-  console.log(name);
 
   const navigate = useNavigate();
 
@@ -92,6 +93,11 @@ const Profile = () => {
             />
           </form>
         </div>
+        <Link to="/create-listing" className="createListing">
+          <HomeIcon width="24px" height="24px" />
+          <p>Sell or rent your home</p>
+          <ArrowRight width="24px" height="24px" />
+        </Link>
       </main>
     </div>
   );
