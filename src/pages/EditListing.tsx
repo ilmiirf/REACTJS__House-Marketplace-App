@@ -6,9 +6,9 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { doc, updateDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase.config";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
@@ -32,9 +32,11 @@ interface FormDataProps {
   userRef?: string;
 }
 
-const CreateListing = () => {
+const EditListing = () => {
   const [geolocationEnabled, setGeolocationEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [listing, setListing] = useState<any>(null);
+  const params = useParams();
 
   const [formData, setFormData] = useState<FormDataProps>({
     type: "rent",
@@ -71,6 +73,33 @@ const CreateListing = () => {
   const auth = getAuth();
   const navigate = useNavigate();
   const isMounted = useRef(true);
+
+  // Redirect if listing is not user's
+  useEffect(() => {
+    if (listing && listing.userRef !== auth.currentUser?.uid) {
+      toast.error("You can not edit that listing");
+      navigate("/");
+    }
+  }, [auth.currentUser?.uid, listing, navigate]);
+
+  useEffect(() => {
+    setLoading(true);
+    const fetchListing = async () => {
+      const docRef = doc(db, "listings", params.listingId!);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setListing(docSnap.data());
+        console.log(docSnap.data());
+        setFormData({ ...docSnap.data(), address: docSnap.data().location });
+        setLoading(false);
+      } else {
+        navigate("/");
+        toast.error("Listing does not exist");
+      }
+    };
+    fetchListing();
+  }, [params.listingId, navigate]);
 
   useEffect(() => {
     if (isMounted) {
@@ -190,9 +219,8 @@ const CreateListing = () => {
 
     !formDataCopy.offer && delete formDataCopy.discountedPrice;
 
-    console.log(formDataCopy);
-
-    const docRef = await addDoc(collection(db, "listings"), formDataCopy);
+    const docRef = doc(db, "listings", params.listingId!);
+    await updateDoc(docRef, formDataCopy);
 
     setLoading(false);
 
@@ -353,7 +381,6 @@ const CreateListing = () => {
           <label className="formLabel">Address</label>
           <textarea
             className="formInputAddress"
-            type="text"
             id="address"
             value={address}
             onChange={onMutate}
@@ -441,7 +468,7 @@ const CreateListing = () => {
             required
           />
           <button type="submit" className="primaryButton createListingButton">
-            Create Listing
+            Update Listing
           </button>
         </form>
       </main>
@@ -449,4 +476,4 @@ const CreateListing = () => {
   );
 };
 
-export default CreateListing;
+export default EditListing;

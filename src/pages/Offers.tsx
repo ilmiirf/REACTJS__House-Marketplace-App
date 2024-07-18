@@ -23,6 +23,8 @@ interface Listings {
 const Offers = () => {
   const [listings, setListings] = useState<Listings[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastFetchedListing, setLastFetchedListing] = useState<any>(null);
+
   const params = useParams();
 
   useEffect(() => {
@@ -36,7 +38,7 @@ const Offers = () => {
           listingRef,
           where("offer", "==", true),
           orderBy("timestamp", "desc"),
-          limit(10)
+          limit(1)
         );
 
         // execute query
@@ -58,6 +60,41 @@ const Offers = () => {
     fetchListings();
   }, []);
 
+  const onFetchMoreListings = async () => {
+    try {
+      // get reference
+      const listingRef = collection(db, "listings");
+
+      // create query
+      const q = query(
+        listingRef,
+        where("offer", "==", true),
+        orderBy("timestamp", "desc"),
+        limit(10)
+      );
+
+      // execute query
+      const querySnap = await getDocs(q);
+
+      const lastVisible = querySnap.docs[querySnap.docs.length - 1];
+
+      setLastFetchedListing(lastVisible);
+
+      // eslint-disable-next-line prefer-const
+      let listings: Listings[] = [];
+      querySnap.forEach((doc) => {
+        return listings.push({
+          id: doc.id,
+          data: doc.data(),
+        });
+      });
+      setListings((prevState) => [...prevState, ...listings]);
+      setLoading(false);
+    } catch (error) {
+      toast.error("Could not fetch listing");
+    }
+  };
+
   return (
     <div className="category">
       <header>
@@ -78,6 +115,12 @@ const Offers = () => {
               ))}
             </ul>
           </main>
+          {lastFetchedListing && (
+            <p className="loadMore" onClick={onFetchMoreListings}>
+              Load More
+            </p>
+          )}
+          <br />
         </>
       ) : (
         <p>There are no current offers</p>
