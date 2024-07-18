@@ -6,8 +6,8 @@ To start a development server, run `npm run dev`.
 
 ## Authentication
 
-email: test@test.com
-password: test123
+`email: test@test.com
+password: test123`
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

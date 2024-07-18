@@ -1,5 +1,9 @@
 {
+  "compilerOptions": {
+    "types": ["node", "vite/client"]
+  },
   "files": [],
+  "include": ["vite-env.d.ts"],
   "references": [
     {
       "path": "./tsconfig.app.json"
